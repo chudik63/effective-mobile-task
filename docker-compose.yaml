@@ -2,7 +2,7 @@ services:
   app:
     build:
       context: .
-      Dockerfile: Dockerfile
+      dockerfile: Dockerfile
     container_name: app
     depends_on:
       migrator:
