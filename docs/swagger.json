@@ -80,21 +80,12 @@
                 "summary": "AddSong",
                 "parameters": [
                     {
-                        "description": "Song group",
-                        "name": "group",
+                        "description": "Song data",
+                        "name": "body",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "type": "string"
-                        }
-                    },
-                    {
-                        "description": "Song name",
-                        "name": "song",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "type": "string"
+                            "type": "object"
                         }
                     }
                 ],
@@ -181,12 +172,12 @@
                         "required": true
                     },
                     {
-                        "description": "Updated song",
-                        "name": "song",
+                        "description": "Song data",
+                        "name": "body",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/effective-mobile-task_internal_models.Song"
+                            "type": "object"
                         }
                     }
                 ],
@@ -260,37 +251,6 @@
                             "type": "string"
                         }
                     }
-                }
-            }
-        }
-    },
-    "definitions": {
-        "effective-mobile-task_internal_models.Song": {
-            "description": "Information about a song in the library",
-            "type": "object",
-            "properties": {
-                "group": {
-                    "description": "Musician group\nRequired: true",
-                    "type": "string"
-                },
-                "link": {
-                    "description": "Link to the song",
-                    "type": "string"
-                },
-                "release_date": {
-                    "description": "Date when song was released\nRequired: true",
-                    "type": "string"
-                },
-                "song": {
-                    "description": "Song name\nRequired: true",
-                    "type": "string"
-                },
-                "song_id": {
-                    "type": "integer"
-                },
-                "text": {
-                    "description": "Song lyrics",
-                    "type": "string"
                 }
             }
         }

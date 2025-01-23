@@ -57,8 +57,7 @@ func NewHandler(router *gin.Engine, client Client, service Service, logger logge
 // @Description Add new song to the library
 // @Accept json
 // @Produce json
-// @Param group body string true "Song group"
-// @Param song body string true "Song name"
+// @Param body body object true "Song data" example { "group": "Muse", "song": "Supermassive Black Hole" }
 // @Success 200
 // @Failure 400 {string} map[string]string
 // @Failure 404 {string} map[string]string
@@ -167,7 +166,7 @@ func (h *Handler) GetSongLyrics(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param id path uint64 true "Song id"
-// @Param song body models.Song true "Updated song"
+// @Param body body object true "Song data" example { "group": "Muse", "song": "Supermassive Black Hole", "release_date": "16.07.2006", "text": "text", "link": "link"  }
 // @Success 200
 // @Failure 400 {string} map[string]string
 // @Failure 404 {string} map[string]string
