@@ -205,6 +205,9 @@ func (h *Handler) UpdateSong(c *gin.Context) {
 
 	song.Id = id
 
+	parsedTime, _ := time.Parse("02.01.2006", song.ReleaseDate)
+	song.ReleaseDate = parsedTime.Format(time.DateOnly)
+
 	if err := h.service.UpdateSong(c.Request.Context(), &song); err != nil {
 		h.logger.Error(c.Request.Context(), "Failed to update song", zap.String("err", err.Error()))
 
