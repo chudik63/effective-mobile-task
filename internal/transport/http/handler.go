@@ -1,13 +1,256 @@
 package http
 
-import "github.com/gin-gonic/gin"
+import (
+	"context"
+	"effective-mobile-task/internal/models"
+	"effective-mobile-task/internal/repository"
+	"effective-mobile-task/pkg/logger"
+	"errors"
+	"net/http"
+	"strconv"
+
+	"github.com/gin-gonic/gin"
+	"go.uber.org/zap"
+)
 
 type Service interface {
+	AddSong(ctx context.Context, song *models.Song) (uint64, error)
+	UpdateSong(ctx context.Context, song *models.Song) error
+	DeleteSong(ctx context.Context, id uint64) error
+	GetSongLyrics(ctx context.Context, id uint64, offset int) (string, error)
+	GetSongs(ctx context.Context, creds repository.Creds, offset uint64, limit uint64) ([]*models.Song, error)
+}
+
+type Client interface {
+	GetSongInfo(group, song string) (*models.SongInfo, error)
 }
 
 type Handler struct {
+	client  Client
+	service Service
+	logger  logger.Logger
 }
 
-func NewHandler(router *gin.Engine, service Service) {
+func NewHandler(router *gin.Engine, client Client, service Service, logger logger.Logger) {
+	handler := &Handler{
+		client:  client,
+		service: service,
+		logger:  logger,
+	}
 
+	router.GET("/library", handler.GetSongs)
+	router.GET("/song/:id/lyrics", handler.GetSongLyrics)
+	router.POST("/song", handler.AddSong)
+	router.PATCH("/song/:id", handler.UpdateSong)
+	router.DELETE("/song/:id", handler.DeleteSong)
+}
+
+func (h *Handler) AddSong(c *gin.Context) {
+	var song models.Song
+
+	if err := c.ShouldBindJSON(&song); err != nil {
+		h.logger.Error(c.Request.Context(), "Failed to read song from JSON", zap.String("err", err.Error()))
+
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": "Failed to read song from JSON",
+		})
+
+		return
+	}
+
+	info, err := h.client.GetSongInfo(song.Group, song.Song)
+	if err != nil {
+		h.logger.Error(c.Request.Context(), "Failed to get song info", zap.String("err", err.Error()))
+
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": err,
+		})
+
+		return
+	}
+
+	song.ReleaseDate = info.ReleaseDate
+	song.Text = info.Text
+	song.Link = info.Link
+
+	id, err := h.service.AddSong(c.Request.Context(), &song)
+	if err != nil {
+		h.logger.Error(c.Request.Context(), "Failed to add song", zap.String("err", err.Error()))
+
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": "Failed to add song",
+		})
+
+		return
+	}
+
+	h.logger.Info(c.Request.Context(), "Song added", zap.Uint64("id", id))
+
+	c.JSON(http.StatusCreated, gin.H{
+		"id": id,
+	})
+}
+
+func (h *Handler) GetSongLyrics(c *gin.Context) {
+	idStr := c.Param("id")
+	id, err := strconv.ParseUint(idStr, 10, 64)
+	if err != nil {
+		h.logger.Error(c.Request.Context(), "Failed to parse song id", zap.String("err", err.Error()))
+
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": "Invalid Song ID",
+		})
+
+		return
+	}
+
+	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
+
+	offset := page - 1
+
+	verses, err := h.service.GetSongLyrics(c.Request.Context(), id, offset)
+	if err != nil {
+		h.logger.Error(c.Request.Context(), "Failed to get song lyrics", zap.String("err", err.Error()))
+
+		if errors.Is(err, models.ErrNotFound) {
+			c.JSON(http.StatusNotFound, gin.H{
+				"error": err,
+			})
+			return
+		}
+
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": err,
+		})
+
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"verses": verses,
+	})
+}
+
+func (h *Handler) UpdateSong(c *gin.Context) {
+	idStr := c.Param("id")
+	id, err := strconv.ParseUint(idStr, 10, 64)
+	if err != nil {
+		h.logger.Error(c.Request.Context(), "Failed to parse song id", zap.String("err", err.Error()))
+
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": "Invalid Song ID",
+		})
+
+		return
+	}
+
+	var song models.Song
+
+	if err := c.ShouldBindJSON(&song); err != nil {
+		h.logger.Error(c.Request.Context(), "Failed to read song from JSON", zap.String("err", err.Error()))
+
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": "Failed to read song from JSON",
+		})
+
+		return
+	}
+
+	song.Id = id
+
+	if err := h.service.UpdateSong(c.Request.Context(), &song); err != nil {
+		h.logger.Error(c.Request.Context(), "Failed to update song", zap.String("err", err.Error()))
+
+		if errors.Is(err, models.ErrNotFound) {
+			c.JSON(http.StatusNotFound, gin.H{
+				"error": err,
+			})
+			return
+		}
+
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": err,
+		})
+
+		return
+	}
+
+	h.logger.Error(c.Request.Context(), "Song updated", zap.Uint64("id", id))
+
+	c.Status(http.StatusOK)
+}
+
+func (h *Handler) DeleteSong(c *gin.Context) {
+	idStr := c.Param("id")
+	id, err := strconv.ParseUint(idStr, 10, 64)
+	if err != nil {
+		h.logger.Error(c.Request.Context(), "Failed to parse song id", zap.String("err", err.Error()))
+
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": "Invalid Song ID",
+		})
+
+		return
+	}
+
+	if err := h.service.DeleteSong(c.Request.Context(), id); err != nil {
+		h.logger.Error(c.Request.Context(), "Failed to delete song", zap.String("err", err.Error()))
+
+		if errors.Is(err, models.ErrNotFound) {
+			c.JSON(http.StatusBadRequest, gin.H{
+				"error": err,
+			})
+
+			return
+		}
+
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": "Failed to delete song",
+		})
+
+		return
+	}
+
+	h.logger.Error(c.Request.Context(), "Song deleted", zap.Uint64("id", id))
+
+	c.Status(http.StatusOK)
+}
+
+func (h *Handler) GetSongs(c *gin.Context) {
+	creds := repository.Creds{}
+	if group := c.Query("group"); group != "" {
+		creds["group"] = group
+	}
+	if song := c.Query("song"); song != "" {
+		creds["song"] = song
+	}
+	if date := c.Query("release_date"); date != "" {
+		creds["release_data"] = date
+	}
+
+	page, _ := strconv.ParseUint(c.DefaultQuery("page", "1"), 10, 64)
+	limit, _ := strconv.ParseUint(c.DefaultQuery("limit", "10"), 10, 64)
+	offset := (page - 1) * limit
+
+	songs, err := h.service.GetSongs(c.Request.Context(), creds, offset, limit)
+	if err != nil {
+		h.logger.Error(c.Request.Context(), "Failed to list songs", zap.String("err", err.Error()))
+
+		if errors.Is(err, models.ErrNotFound) {
+			c.JSON(http.StatusNotFound, gin.H{
+				"error": err,
+			})
+			return
+		}
+
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": "Failed to list songs",
+		})
+
+		return
+	}
+
+	c.JSON(http.StatusCreated, gin.H{
+		"songs": songs,
+	})
 }
