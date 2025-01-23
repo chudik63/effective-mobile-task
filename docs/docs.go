@@ -88,11 +88,11 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "description": "Song data",
-                        "name": "body",
+                        "name": "input",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "type": "object"
+                            "$ref": "#/definitions/effective-mobile-task_internal_models.AddSongInput"
                         }
                     }
                 ],
@@ -180,11 +180,11 @@ const docTemplate = `{
                     },
                     {
                         "description": "Song data",
-                        "name": "body",
+                        "name": "input",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "type": "object"
+                            "$ref": "#/definitions/effective-mobile-task_internal_models.UpdateSongInput"
                         }
                     }
                 ],
@@ -258,6 +258,39 @@ const docTemplate = `{
                             "type": "string"
                         }
                     }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "effective-mobile-task_internal_models.AddSongInput": {
+            "type": "object",
+            "properties": {
+                "group": {
+                    "type": "string"
+                },
+                "song": {
+                    "type": "string"
+                }
+            }
+        },
+        "effective-mobile-task_internal_models.UpdateSongInput": {
+            "type": "object",
+            "properties": {
+                "group": {
+                    "type": "string"
+                },
+                "link": {
+                    "type": "string"
+                },
+                "release_date": {
+                    "type": "string"
+                },
+                "song": {
+                    "type": "string"
+                },
+                "text": {
+                    "type": "string"
                 }
             }
         }

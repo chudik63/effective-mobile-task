@@ -1,3 +1,24 @@
+definitions:
+  effective-mobile-task_internal_models.AddSongInput:
+    properties:
+      group:
+        type: string
+      song:
+        type: string
+    type: object
+  effective-mobile-task_internal_models.UpdateSongInput:
+    properties:
+      group:
+        type: string
+      link:
+        type: string
+      release_date:
+        type: string
+      song:
+        type: string
+      text:
+        type: string
+    type: object
 host: localhost:80
 info:
   contact: {}
@@ -53,10 +74,10 @@ paths:
       parameters:
       - description: Song data
         in: body
-        name: body
+        name: input
         required: true
         schema:
-          type: object
+          $ref: '#/definitions/effective-mobile-task_internal_models.AddSongInput'
       produces:
       - application/json
       responses:
@@ -114,10 +135,10 @@ paths:
         type: integer
       - description: Song data
         in: body
-        name: body
+        name: input
         required: true
         schema:
-          type: object
+          $ref: '#/definitions/effective-mobile-task_internal_models.UpdateSongInput'
       produces:
       - application/json
       responses:
