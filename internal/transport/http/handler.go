@@ -82,22 +82,18 @@ func (h *Handler) AddSong(c *gin.Context) {
 		Song:  inp.Song,
 	}
 
-	//info, err := h.client.GetSongInfo(song.Group, song.Song)
-	//if err != nil {
-	//	h.logger.Error(c.Request.Context(), "Failed to get song info", zap.String("err", err.Error()))
-	//
-	//	c.JSON(http.StatusInternalServerError, gin.H{
-	//		"error": err.Error(),
-	//	})
-	//
-	//	return
-	//}
+	info, err := h.client.GetSongInfo(song.Group, song.Song)
+	if err != nil {
+		h.logger.Error(c.Request.Context(), "Failed to get song info", zap.String("err", err.Error()))
 
-	//song.ReleaseDate = info.ReleaseDate
-	//song.Text = info.Text
-	//song.Link = info.Link
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": err.Error(),
+		})
 
-	parsedTime, err := time.Parse("02.01.2006", "16.07.2006")
+		return
+	}
+
+	parsedTime, err := time.Parse("02.01.2006", info.ReleaseDate)
 	if err != nil {
 		h.logger.Error(c.Request.Context(), "Failed to parse time format", zap.String("expected", "02.01.2006"))
 
@@ -109,8 +105,8 @@ func (h *Handler) AddSong(c *gin.Context) {
 	}
 
 	song.ReleaseDate = parsedTime
-	song.Text = "text1\n\ntext2\n\ntext3"
-	song.Link = "link"
+	song.Text = info.Text
+	song.Link = info.Link
 
 	id, err := h.service.AddSong(c.Request.Context(), &song)
 	if err != nil {
