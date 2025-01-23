@@ -82,7 +82,7 @@ func (h *Handler) AddSong(c *gin.Context) {
 		h.logger.Error(c.Request.Context(), "Failed to get song info", zap.String("err", err.Error()))
 
 		c.JSON(http.StatusInternalServerError, gin.H{
-			"error": err,
+			"error": err.Error(),
 		})
 
 		return
@@ -144,13 +144,13 @@ func (h *Handler) GetSongLyrics(c *gin.Context) {
 
 		if errors.Is(err, models.ErrNotFound) {
 			c.JSON(http.StatusNotFound, gin.H{
-				"error": err,
+				"error": err.Error(),
 			})
 			return
 		}
 
 		c.JSON(http.StatusInternalServerError, gin.H{
-			"error": err,
+			"error": err.Error(),
 		})
 
 		return
@@ -167,11 +167,7 @@ func (h *Handler) GetSongLyrics(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param id path uint64 true "Song id"
-// @Param group body string false "Song group"
-// @Param song body string false "Song name"
-// @Param release_date body string false "Song release date"
-// @Param text body string false "Song lyrics"
-// @Param link body string false "Song id"
+// @Param song body models.Song true "Updated song"
 // @Success 200
 // @Failure 400 {string} map[string]string
 // @Failure 404 {string} map[string]string
@@ -209,13 +205,13 @@ func (h *Handler) UpdateSong(c *gin.Context) {
 
 		if errors.Is(err, models.ErrNotFound) {
 			c.JSON(http.StatusNotFound, gin.H{
-				"error": err,
+				"error": err.Error(),
 			})
 			return
 		}
 
 		c.JSON(http.StatusInternalServerError, gin.H{
-			"error": err,
+			"error": err.Error(),
 		})
 
 		return
@@ -254,7 +250,7 @@ func (h *Handler) DeleteSong(c *gin.Context) {
 
 		if errors.Is(err, models.ErrNotFound) {
 			c.JSON(http.StatusNotFound, gin.H{
-				"error": err,
+				"error": err.Error(),
 			})
 
 			return
@@ -307,7 +303,7 @@ func (h *Handler) GetSongs(c *gin.Context) {
 
 		if errors.Is(err, models.ErrNotFound) {
 			c.JSON(http.StatusNotFound, gin.H{
-				"error": err,
+				"error": err.Error(),
 			})
 			return
 		}
@@ -319,7 +315,7 @@ func (h *Handler) GetSongs(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusCreated, gin.H{
+	c.JSON(http.StatusOK, gin.H{
 		"songs": songs,
 	})
 }

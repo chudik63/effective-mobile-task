@@ -134,9 +134,6 @@ func (r *Repository) GetSongs(ctx context.Context, creds Creds, offset uint64, l
 
 	rows, err := query.Query()
 	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			return nil, models.ErrNotFound
-		}
 		return nil, err
 	}
 	defer rows.Close()
@@ -155,6 +152,10 @@ func (r *Repository) GetSongs(ctx context.Context, creds Creds, offset uint64, l
 
 	if rows.Err() != nil {
 		return nil, err
+	}
+
+	if len(songs) == 0 {
+		return nil, models.ErrNotFound
 	}
 
 	return songs, nil
