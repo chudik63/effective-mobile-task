@@ -43,7 +43,7 @@ func (r *Repository) UpdateSong(ctx context.Context, song *models.Song) error {
 	query := sq.Update("public.songs").PlaceholderFormat(sq.Dollar)
 
 	if song.Group != "" {
-		query = query.Set("group", song.Group)
+		query = query.Set("group_name", song.Group)
 	}
 	if song.Song != "" {
 		query = query.Set("song", song.Song)

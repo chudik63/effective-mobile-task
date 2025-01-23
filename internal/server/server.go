@@ -27,12 +27,12 @@ func NewServer(cfg *config.Config, handler http.Handler) *Server {
 func (s *Server) Run(ctx context.Context) error {
 	logs := logger.GetLoggerFromCtx(ctx)
 
+	logs.Info(ctx, fmt.Sprintf("Server listening on %s", s.httpServer.Addr))
+
 	err := s.httpServer.ListenAndServe()
 	if err != http.ErrServerClosed {
 		return err
 	}
-
-	logs.Info(ctx, fmt.Sprintf("Server listening on %s", s.httpServer.Addr))
 
 	return nil
 }
