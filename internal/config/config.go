@@ -10,6 +10,7 @@ import (
 type Config struct {
 	postgres.Config
 	ServerPort string `env:"SERVER_PORT"`
+	ServerHost string `env:"SERVER_HOST"`
 }
 
 func Load() (*Config, error) {
