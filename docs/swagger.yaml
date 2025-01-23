@@ -1,3 +1,31 @@
+definitions:
+  effective-mobile-task_internal_models.Song:
+    description: Information about a song in the library
+    properties:
+      group:
+        description: |-
+          Musician group
+          Required: true
+        type: string
+      link:
+        description: Link to the song
+        type: string
+      release_date:
+        description: |-
+          Date when song was released
+          Required: true
+        type: string
+      song:
+        description: |-
+          Song name
+          Required: true
+        type: string
+      song_id:
+        type: integer
+      text:
+        description: Song lyrics
+        type: string
+    type: object
 host: localhost:80
 info:
   contact: {}
@@ -118,31 +146,12 @@ paths:
         name: id
         required: true
         type: integer
-      - description: Song group
-        in: body
-        name: group
-        schema:
-          type: string
-      - description: Song name
+      - description: Updated song
         in: body
         name: song
+        required: true
         schema:
-          type: string
-      - description: Song release date
-        in: body
-        name: release_date
-        schema:
-          type: string
-      - description: Song lyrics
-        in: body
-        name: text
-        schema:
-          type: string
-      - description: Song id
-        in: body
-        name: link
-        schema:
-          type: string
+          $ref: '#/definitions/effective-mobile-task_internal_models.Song'
       produces:
       - application/json
       responses:

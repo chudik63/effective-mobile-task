@@ -181,43 +181,12 @@
                         "required": true
                     },
                     {
-                        "description": "Song group",
-                        "name": "group",
-                        "in": "body",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    {
-                        "description": "Song name",
+                        "description": "Updated song",
                         "name": "song",
                         "in": "body",
+                        "required": true,
                         "schema": {
-                            "type": "string"
-                        }
-                    },
-                    {
-                        "description": "Song release date",
-                        "name": "release_date",
-                        "in": "body",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    {
-                        "description": "Song lyrics",
-                        "name": "text",
-                        "in": "body",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    {
-                        "description": "Song id",
-                        "name": "link",
-                        "in": "body",
-                        "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/effective-mobile-task_internal_models.Song"
                         }
                     }
                 ],
@@ -291,6 +260,37 @@
                             "type": "string"
                         }
                     }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "effective-mobile-task_internal_models.Song": {
+            "description": "Information about a song in the library",
+            "type": "object",
+            "properties": {
+                "group": {
+                    "description": "Musician group\nRequired: true",
+                    "type": "string"
+                },
+                "link": {
+                    "description": "Link to the song",
+                    "type": "string"
+                },
+                "release_date": {
+                    "description": "Date when song was released\nRequired: true",
+                    "type": "string"
+                },
+                "song": {
+                    "description": "Song name\nRequired: true",
+                    "type": "string"
+                },
+                "song_id": {
+                    "type": "integer"
+                },
+                "text": {
+                    "description": "Song lyrics",
+                    "type": "string"
                 }
             }
         }
