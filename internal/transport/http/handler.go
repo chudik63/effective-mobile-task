@@ -92,7 +92,8 @@ func (h *Handler) AddSong(c *gin.Context) {
 	//song.Text = info.Text
 	//song.Link = info.Link
 
-	song.ReleaseDate, _ = time.Parse(time.DateOnly, "16.07.2006")
+	parsedTime, _ := time.Parse("02.01.2006", "16.07.2006")
+	song.ReleaseDate = parsedTime.Format(time.DateOnly)
 	song.Text = "text1\n\ntext2\n\ntext3"
 	song.Link = "link"
 

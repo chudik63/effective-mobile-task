@@ -1,7 +1,5 @@
 package models
 
-import "time"
-
 // Song model godoc
 // @Description Information about a song in the library
 type Song struct {
@@ -14,7 +12,7 @@ type Song struct {
 	Song string `json:"song"`
 	// Date when song was released
 	// Required: true
-	ReleaseDate time.Time `json:"release_date"`
+	ReleaseDate string `json:"release_date"`
 	// Song lyrics
 	Text string `json:"text"`
 	// Link to the song
