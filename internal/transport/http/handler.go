@@ -23,7 +23,7 @@ type Service interface {
 	AddSong(ctx context.Context, song *models.Song) (uint64, error)
 	UpdateSong(ctx context.Context, song *models.Song) error
 	DeleteSong(ctx context.Context, id uint64) error
-	GetSongLyrics(ctx context.Context, id uint64, offset int) (string, error)
+	GetSongLyrics(ctx context.Context, id uint64, offset uint64) (string, error)
 	GetSongs(ctx context.Context, creds repository.Creds, offset uint64, limit uint64) ([]*models.Song, error)
 }
 
@@ -154,7 +154,16 @@ func (h *Handler) GetSongLyrics(c *gin.Context) {
 		return
 	}
 
-	page, _ := strconv.Atoi(c.DefaultQuery("page", "1"))
+	page, err := strconv.ParseUint(c.DefaultQuery("page", "1"), 10, 64)
+	if err != nil || page == 0 {
+		h.logger.Error(c.Request.Context(), "Failed to get song lyrics")
+
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": "Invalid page value",
+		})
+
+		return
+	}
 
 	offset := page - 1
 
@@ -331,8 +340,28 @@ func (h *Handler) GetSongs(c *gin.Context) {
 		creds["release_data"] = date
 	}
 
-	page, _ := strconv.ParseUint(c.DefaultQuery("page", "1"), 10, 64)
-	limit, _ := strconv.ParseUint(c.DefaultQuery("limit", "10"), 10, 64)
+	page, err := strconv.ParseUint(c.DefaultQuery("page", "1"), 10, 64)
+	if err != nil || page == 0 {
+		h.logger.Error(c.Request.Context(), "Failed to get song lyrics")
+
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": "Invalid page value",
+		})
+
+		return
+	}
+
+	limit, err := strconv.ParseUint(c.DefaultQuery("limit", "10"), 10, 64)
+	if err != nil || limit == 0 {
+		h.logger.Error(c.Request.Context(), "Failed to get song lyrics")
+
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": "Invalid limit value",
+		})
+
+		return
+	}
+
 	offset := (page - 1) * limit
 
 	songs, err := h.service.GetSongs(c.Request.Context(), creds, offset, limit)

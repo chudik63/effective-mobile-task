@@ -23,13 +23,17 @@ func New(repo Repository) *Service {
 	return &Service{repo}
 }
 
-func (s *Service) GetSongLyrics(ctx context.Context, id uint64, offset int) (string, error) {
+func (s *Service) GetSongLyrics(ctx context.Context, id uint64, offset uint64) (string, error) {
 	lyrics, err := s.repo.GetSongText(ctx, id)
 	if err != nil {
 		return "", err
 	}
 
 	verses := strings.Split(lyrics, "\n\n")
+
+	if offset >= uint64(len(verses)) {
+		return "", models.ErrNotFound
+	}
 
 	return verses[offset], nil
 }
