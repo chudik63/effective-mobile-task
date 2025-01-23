@@ -24,7 +24,7 @@ func New(db postgres.DB) *Repository {
 func (r *Repository) AddSong(ctx context.Context, song *models.Song) (uint64, error) {
 	var id uint64
 	err := sq.Insert("public.songs").
-		Columns("group", "song", "release_date", "text", "link").
+		Columns("group_name", "song", "release_date", "text", "link").
 		Values(song.Group, song.Song, song.ReleaseDate, song.Text, song.Link).
 		Suffix("RETURNING id").
 		PlaceholderFormat(sq.Dollar).
