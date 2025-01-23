@@ -76,20 +76,24 @@ func (h *Handler) AddSong(c *gin.Context) {
 		return
 	}
 
-	info, err := h.client.GetSongInfo(song.Group, song.Song)
-	if err != nil {
-		h.logger.Error(c.Request.Context(), "Failed to get song info", zap.String("err", err.Error()))
+	//info, err := h.client.GetSongInfo(song.Group, song.Song)
+	//if err != nil {
+	//	h.logger.Error(c.Request.Context(), "Failed to get song info", zap.String("err", err.Error()))
+	//
+	//	c.JSON(http.StatusInternalServerError, gin.H{
+	//		"error": err.Error(),
+	//	})
+	//
+	//	return
+	//}
 
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"error": err.Error(),
-		})
+	//song.ReleaseDate = info.ReleaseDate
+	//song.Text = info.Text
+	//song.Link = info.Link
 
-		return
-	}
-
-	song.ReleaseDate = info.ReleaseDate
-	song.Text = info.Text
-	song.Link = info.Link
+	song.ReleaseDate = "16.07.2006"
+	song.Text = "text1\n\ntext2\n\ntext3"
+	song.Link = "link"
 
 	id, err := h.service.AddSong(c.Request.Context(), &song)
 	if err != nil {
