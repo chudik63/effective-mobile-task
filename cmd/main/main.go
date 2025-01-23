@@ -8,6 +8,7 @@ import (
 	"effective-mobile-task/internal/server"
 	"effective-mobile-task/internal/service"
 	"effective-mobile-task/internal/transport/http"
+	"effective-mobile-task/internal/transport/http/middleware"
 	"effective-mobile-task/pkg/logger"
 	"fmt"
 	"os"
@@ -40,11 +41,14 @@ func main() {
 	repo := repository.New(db)
 	service := service.New(repo)
 
-	router := gin.Default()
+	r := gin.Default()
 
-	http.NewHandler(router, service)
+	r.Use(middleware.LogMiddleware(mainLogger))
 
-	srv := server.NewServer(cfg, router.Handler())
+	c := http.NewClient(cfg.ServerHost, cfg.ServerPort)
+	http.NewHandler(r, c, service, mainLogger)
+
+	srv := server.NewServer(cfg, r.Handler())
 
 	go func() {
 		if err := srv.Run(ctx); err != nil {
