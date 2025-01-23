@@ -4,9 +4,17 @@ import (
 	"context"
 	"effective-mobile-task/internal/config"
 	"effective-mobile-task/internal/database/postgres"
+	"effective-mobile-task/internal/repository"
+	"effective-mobile-task/internal/server"
+	"effective-mobile-task/internal/service"
+	"effective-mobile-task/internal/transport/http"
 	"effective-mobile-task/pkg/logger"
 	"fmt"
+	"os"
+	"os/signal"
+	"syscall"
 
+	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 )
 
@@ -29,5 +37,29 @@ func main() {
 
 	db := postgres.New(ctx, cfg.Config)
 
-	_ = db
+	repo := repository.New(db)
+	service := service.New(repo)
+
+	router := gin.Default()
+
+	http.NewHandler(router, service)
+
+	srv := server.NewServer(cfg, router.Handler())
+
+	go func() {
+		if err := srv.Run(ctx); err != nil {
+			mainLogger.Fatal(ctx, "failed to start server", zap.String("err", err.Error()))
+		}
+	}()
+
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
+
+	<-quit
+
+	if err := srv.Stop(); err != nil {
+		mainLogger.Error(ctx, "failed to stop server", zap.String("err", err.Error()))
+	}
+
+	mainLogger.Info(ctx, "server stopped")
 }

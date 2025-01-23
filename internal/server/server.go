@@ -3,6 +3,8 @@ package server
 import (
 	"context"
 	"effective-mobile-task/internal/config"
+	"effective-mobile-task/pkg/logger"
+	"fmt"
 	"net/http"
 	"time"
 )
@@ -22,11 +24,16 @@ func NewServer(cfg *config.Config, handler http.Handler) *Server {
 	}
 }
 
-func (s *Server) Run() error {
+func (s *Server) Run(ctx context.Context) error {
+	logs := logger.GetLoggerFromCtx(ctx)
+
 	err := s.httpServer.ListenAndServe()
 	if err != http.ErrServerClosed {
 		return err
 	}
+
+	logs.Info(ctx, fmt.Sprintf("Server listening on %s", s.httpServer.Addr))
+
 	return nil
 }
 
