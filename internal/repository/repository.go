@@ -48,7 +48,7 @@ func (r *Repository) UpdateSong(ctx context.Context, song *models.Song) error {
 	if song.Song != "" {
 		query = query.Set("song", song.Song)
 	}
-	if song.ReleaseDate != "" {
+	if !song.ReleaseDate.IsZero() {
 		query = query.Set("release_date", song.ReleaseDate)
 	}
 	if song.Text != "" {

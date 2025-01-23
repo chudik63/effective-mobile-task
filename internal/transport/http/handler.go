@@ -65,9 +65,9 @@ func NewHandler(router *gin.Engine, client Client, service Service, logger logge
 // @Failure 500 {string} map[string]string
 // @Router /song [post]
 func (h *Handler) AddSong(c *gin.Context) {
-	var song models.Song
+	var inp models.AddSongInput
 
-	if err := c.ShouldBindJSON(&song); err != nil {
+	if err := c.ShouldBindJSON(&inp); err != nil {
 		h.logger.Error(c.Request.Context(), "Failed to read song from JSON", zap.String("err", err.Error()))
 
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -75,6 +75,11 @@ func (h *Handler) AddSong(c *gin.Context) {
 		})
 
 		return
+	}
+
+	song := models.Song{
+		Group: inp.Group,
+		Song:  inp.Song,
 	}
 
 	//info, err := h.client.GetSongInfo(song.Group, song.Song)
@@ -92,8 +97,18 @@ func (h *Handler) AddSong(c *gin.Context) {
 	//song.Text = info.Text
 	//song.Link = info.Link
 
-	parsedTime, _ := time.Parse("02.01.2006", "16.07.2006")
-	song.ReleaseDate = parsedTime.Format(time.DateOnly)
+	parsedTime, err := time.Parse("02.01.2006", "16.07.2006")
+	if err != nil {
+		h.logger.Error(c.Request.Context(), "Failed to parse time format", zap.String("expected", "02.01.2006"))
+
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": err.Error(),
+		})
+
+		return
+	}
+
+	song.ReleaseDate = parsedTime
 	song.Text = "text1\n\ntext2\n\ntext3"
 	song.Link = "link"
 
@@ -191,9 +206,9 @@ func (h *Handler) UpdateSong(c *gin.Context) {
 		return
 	}
 
-	var song models.Song
+	var inp models.UpdateSongInput
 
-	if err := c.ShouldBindJSON(&song); err != nil {
+	if err := c.ShouldBindJSON(&inp); err != nil {
 		h.logger.Error(c.Request.Context(), "Failed to read song from JSON", zap.String("err", err.Error()))
 
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -203,10 +218,25 @@ func (h *Handler) UpdateSong(c *gin.Context) {
 		return
 	}
 
-	song.Id = id
+	parsedTime, err := time.Parse("02.01.2006", inp.ReleaseDate)
+	if err != nil {
+		h.logger.Error(c.Request.Context(), "Failed to parse time format", zap.String("expected", "02.01.2006"))
 
-	parsedTime, _ := time.Parse("02.01.2006", song.ReleaseDate)
-	song.ReleaseDate = parsedTime.Format(time.DateOnly)
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"error": err.Error(),
+		})
+
+		return
+	}
+
+	song := models.Song{
+		Id:          id,
+		Group:       inp.Group,
+		Song:        inp.Song,
+		ReleaseDate: parsedTime,
+		Text:        inp.Text,
+		Link:        inp.Link,
+	}
 
 	if err := h.service.UpdateSong(c.Request.Context(), &song); err != nil {
 		h.logger.Error(c.Request.Context(), "Failed to update song", zap.String("err", err.Error()))
@@ -225,7 +255,7 @@ func (h *Handler) UpdateSong(c *gin.Context) {
 		return
 	}
 
-	h.logger.Error(c.Request.Context(), "Song updated", zap.Uint64("id", id))
+	h.logger.Info(c.Request.Context(), "Song updated", zap.Uint64("id", id))
 
 	c.Status(http.StatusOK)
 }
@@ -271,7 +301,7 @@ func (h *Handler) DeleteSong(c *gin.Context) {
 		return
 	}
 
-	h.logger.Error(c.Request.Context(), "Song deleted", zap.Uint64("id", id))
+	h.logger.Info(c.Request.Context(), "Song deleted", zap.Uint64("id", id))
 
 	c.Status(http.StatusOK)
 }
