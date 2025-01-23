@@ -1,0 +1,196 @@
+host: localhost:80
+info:
+  contact: {}
+  description: Test task for Effective-Mobile
+  title: Effective-Mobile-Task
+  version: "1.0"
+paths:
+  /library:
+    get:
+      description: List all songs in the library. Songs could be filtered
+      parameters:
+      - description: Song group
+        in: query
+        name: group
+        type: string
+      - description: Song name
+        in: query
+        name: song
+        type: string
+      - description: Song release date
+        in: query
+        name: release_date
+        type: string
+      - description: Page number
+        in: query
+        name: page
+        required: true
+        type: integer
+      - description: Limit of songs
+        in: query
+        name: limit
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+        "404":
+          description: Not Found
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: GetSongs
+  /song:
+    post:
+      consumes:
+      - application/json
+      description: Add new song to the library
+      parameters:
+      - description: Song group
+        in: body
+        name: group
+        required: true
+        schema:
+          type: string
+      - description: Song name
+        in: body
+        name: song
+        required: true
+        schema:
+          type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "404":
+          description: Not Found
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: AddSong
+  /song/{id}:
+    delete:
+      description: Delete song from the library by ID
+      parameters:
+      - description: Song id
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "404":
+          description: Not Found
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: DeleteSong
+    patch:
+      consumes:
+      - application/json
+      description: Update song in the library by ID
+      parameters:
+      - description: Song id
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Song group
+        in: body
+        name: group
+        schema:
+          type: string
+      - description: Song name
+        in: body
+        name: song
+        schema:
+          type: string
+      - description: Song release date
+        in: body
+        name: release_date
+        schema:
+          type: string
+      - description: Song lyrics
+        in: body
+        name: text
+        schema:
+          type: string
+      - description: Song id
+        in: body
+        name: link
+        schema:
+          type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "404":
+          description: Not Found
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: UpdateSong
+  /song/{id}/lyrics:
+    get:
+      description: List song lyrics by verses with paginating
+      parameters:
+      - description: Song id
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Page number
+        in: query
+        name: page
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+        "404":
+          description: Not Found
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+          schema:
+            type: string
+      summary: GetSongLyrics
+swagger: "2.0"

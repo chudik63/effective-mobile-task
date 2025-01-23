@@ -1,12 +1,22 @@
 package models
 
+// Song model godoc
+// @Description Information about a song in the library
 type Song struct {
-	Id          uint64 `json:"song_id"`
-	Group       string `json:"group"`
-	Song        string `json:"song"`
+	Id uint64 `json:"song_id"`
+	// Musician group
+	// Required: true
+	Group string `json:"group"`
+	// Song name
+	// Required: true
+	Song string `json:"song"`
+	// Date when song was released
+	// Required: true
 	ReleaseDate string `json:"release_date"`
-	Text        string `json:"text"`
-	Link        string `json:"link"`
+	// Song lyrics
+	Text string `json:"text"`
+	// Link to the song
+	Link string `json:"link"`
 }
 
 type SongInfo struct {

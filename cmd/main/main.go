@@ -23,6 +23,12 @@ const (
 	serviceName = "effective-mobile-task"
 )
 
+// @title Effective-Mobile-Task
+// @version 1.0
+// @description Test task for Effective-Mobile
+
+// @host localhost:80
+
 func main() {
 	mainLogger, err := logger.New(serviceName)
 	if err != nil {

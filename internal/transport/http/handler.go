@@ -11,6 +11,11 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
+
+	_ "effective-mobile-task/docs"
+
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
 type Service interface {
@@ -43,8 +48,22 @@ func NewHandler(router *gin.Engine, client Client, service Service, logger logge
 	router.POST("/song", handler.AddSong)
 	router.PATCH("/song/:id", handler.UpdateSong)
 	router.DELETE("/song/:id", handler.DeleteSong)
+
+	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 }
 
+// AddSong godoc
+// @Summary AddSong
+// @Description Add new song to the library
+// @Accept json
+// @Produce json
+// @Param group body string true "Song group"
+// @Param song body string true "Song name"
+// @Success 200
+// @Failure 400 {string} map[string]string
+// @Failure 404 {string} map[string]string
+// @Failure 500 {string} map[string]string
+// @Router /song [post]
 func (h *Handler) AddSong(c *gin.Context) {
 	var song models.Song
 
@@ -91,6 +110,17 @@ func (h *Handler) AddSong(c *gin.Context) {
 	})
 }
 
+// GetSongLyrics godoc
+// @Summary GetSongLyrics
+// @Description List song lyrics by verses with paginating
+// @Produce json
+// @Param id path uint64 true "Song id"
+// @Param page query uint64 true "Page number"
+// @Success 200
+// @Failure 400 {string} map[string]string
+// @Failure 404 {string} map[string]string
+// @Failure 500 {string} map[string]string
+// @Router /song/{id}/lyrics [get]
 func (h *Handler) GetSongLyrics(c *gin.Context) {
 	idStr := c.Param("id")
 	id, err := strconv.ParseUint(idStr, 10, 64)
@@ -131,6 +161,22 @@ func (h *Handler) GetSongLyrics(c *gin.Context) {
 	})
 }
 
+// UpdateSong godoc
+// @Summary UpdateSong
+// @Description Update song in the library by ID
+// @Accept json
+// @Produce json
+// @Param id path uint64 true "Song id"
+// @Param group body string false "Song group"
+// @Param song body string false "Song name"
+// @Param release_date body string false "Song release date"
+// @Param text body string false "Song lyrics"
+// @Param link body string false "Song id"
+// @Success 200
+// @Failure 400 {string} map[string]string
+// @Failure 404 {string} map[string]string
+// @Failure 500 {string} map[string]string
+// @Router /song/{id} [patch]
 func (h *Handler) UpdateSong(c *gin.Context) {
 	idStr := c.Param("id")
 	id, err := strconv.ParseUint(idStr, 10, 64)
@@ -180,6 +226,16 @@ func (h *Handler) UpdateSong(c *gin.Context) {
 	c.Status(http.StatusOK)
 }
 
+// DeleteSong godoc
+// @Summary DeleteSong
+// @Description Delete song from the library by ID
+// @Produce json
+// @Param id path uint64 true "Song id"
+// @Success 200
+// @Failure 400 {string} map[string]string
+// @Failure 404 {string} map[string]string
+// @Failure 500 {string} map[string]string
+// @Router /song/{id} [delete]
 func (h *Handler) DeleteSong(c *gin.Context) {
 	idStr := c.Param("id")
 	id, err := strconv.ParseUint(idStr, 10, 64)
@@ -197,7 +253,7 @@ func (h *Handler) DeleteSong(c *gin.Context) {
 		h.logger.Error(c.Request.Context(), "Failed to delete song", zap.String("err", err.Error()))
 
 		if errors.Is(err, models.ErrNotFound) {
-			c.JSON(http.StatusBadRequest, gin.H{
+			c.JSON(http.StatusNotFound, gin.H{
 				"error": err,
 			})
 
@@ -216,6 +272,19 @@ func (h *Handler) DeleteSong(c *gin.Context) {
 	c.Status(http.StatusOK)
 }
 
+// GetSongs godoc
+// @Summary GetSongs
+// @Description List all songs in the library. Songs could be filtered
+// @Produce json
+// @Param group query string false "Song group"
+// @Param song query string false "Song name"
+// @Param release_date query string false "Song release date"
+// @Param page query uint64 true "Page number"
+// @Param limit query uint64 true "Limit of songs"
+// @Success 201
+// @Failure 404 {string} map[string]string
+// @Failure 500 {string} map[string]string
+// @Router /library [get]
 func (h *Handler) GetSongs(c *gin.Context) {
 	creds := repository.Creds{}
 	if group := c.Query("group"); group != "" {
