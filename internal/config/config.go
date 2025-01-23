@@ -21,11 +21,6 @@ func Load() (*Config, error) {
 		return nil, err
 	}
 
-	err = cleanenv.ReadConfig(".env", &cfg)
-	if err != nil {
-		return nil, err
-	}
-
 	if cfg == (Config{}) {
 		return nil, errors.New("config is empty")
 	}

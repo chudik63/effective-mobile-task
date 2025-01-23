@@ -108,6 +108,8 @@ func (h *Handler) AddSong(c *gin.Context) {
 	song.Text = info.Text
 	song.Link = info.Link
 
+	h.logger.Debug(c.Request.Context(), "Song to add: ", zap.Any("song", song))
+
 	id, err := h.service.AddSong(c.Request.Context(), &song)
 	if err != nil {
 		h.logger.Error(c.Request.Context(), "Failed to add song", zap.String("err", err.Error()))
@@ -260,7 +262,9 @@ func (h *Handler) UpdateSong(c *gin.Context) {
 		return
 	}
 
-	h.logger.Info(c.Request.Context(), "Song updated", zap.Uint64("id", id))
+	h.logger.Debug(c.Request.Context(), "Updated song", zap.Any("song", song))
+
+	h.logger.Info(c.Request.Context(), "Song successfully updated", zap.Uint64("id", id))
 
 	c.Status(http.StatusOK)
 }
@@ -306,7 +310,7 @@ func (h *Handler) DeleteSong(c *gin.Context) {
 		return
 	}
 
-	h.logger.Info(c.Request.Context(), "Song deleted", zap.Uint64("id", id))
+	h.logger.Info(c.Request.Context(), "Song successfully deleted", zap.Uint64("id", id))
 
 	c.Status(http.StatusOK)
 }
@@ -377,6 +381,8 @@ func (h *Handler) GetSongs(c *gin.Context) {
 
 		return
 	}
+
+	h.logger.Debug(c.Request.Context(), "Listed songs", zap.Any("songs", songs))
 
 	c.JSON(http.StatusOK, gin.H{
 		"songs": songs,
