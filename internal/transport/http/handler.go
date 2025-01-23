@@ -8,6 +8,7 @@ import (
 	"errors"
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
@@ -91,7 +92,7 @@ func (h *Handler) AddSong(c *gin.Context) {
 	//song.Text = info.Text
 	//song.Link = info.Link
 
-	song.ReleaseDate = "16.07.2006"
+	song.ReleaseDate, _ = time.Parse(time.DateOnly, "16.07.2006")
 	song.Text = "text1\n\ntext2\n\ntext3"
 	song.Link = "link"
 
