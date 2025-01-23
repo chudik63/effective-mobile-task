@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"effective-mobile-task/internal/config"
+	"effective-mobile-task/internal/database/postgres"
 	"effective-mobile-task/pkg/logger"
 	"fmt"
 
@@ -26,5 +27,7 @@ func main() {
 		mainLogger.Fatal(ctx, "failed to read config", zap.String("err", err.Error()))
 	}
 
-	_ = cfg
+	db := postgres.New(ctx, cfg.Config)
+
+	_ = db
 }

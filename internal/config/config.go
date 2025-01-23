@@ -1,12 +1,14 @@
 package config
 
 import (
+	"effective-mobile-task/internal/database/postgres"
 	"errors"
 
 	"github.com/ilyakaznacheev/cleanenv"
 )
 
 type Config struct {
+	postgres.Config
 	ServerPort string `env:"SERVER_PORT"`
 }
 
