@@ -1,11 +1,30 @@
 package main
 
-import "effective-mobile-task/internal/config"
+import (
+	"context"
+	"effective-mobile-task/internal/config"
+	"effective-mobile-task/pkg/logger"
+	"fmt"
+
+	"go.uber.org/zap"
+)
+
+const (
+	serviceName = "effective-mobile-task"
+)
 
 func main() {
+	mainLogger, err := logger.New(serviceName)
+	if err != nil {
+		panic(fmt.Errorf("failed to create logger: %v", err))
+	}
+
+	ctx := context.WithValue(context.Background(), logger.LoggerKey, mainLogger)
+
 	cfg, err := config.Load()
 	if err != nil {
-		panic(err)
+		mainLogger.Fatal(ctx, "failed to read config", zap.String("err", err.Error()))
 	}
+
 	_ = cfg
 }
